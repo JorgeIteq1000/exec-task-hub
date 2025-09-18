@@ -1,11 +1,166 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Building2, Users, Calendar } from "lucide-react";
+import { Dashboard } from "@/components/Dashboard";
+import { TaskFilters } from "@/components/TaskFilters";
+import { TaskList } from "@/components/TaskList";
+import { TaskForm } from "@/components/TaskForm";
+import { tasks as mockTasks, sectors } from "@/lib/mockData";
+import type { Task, TaskType, UrgencyLevel, TaskStatus, TaskFormData } from "@/types";
 
 const Index = () => {
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSector, setSelectedSector] = useState("all");
+  const [selectedType, setSelectedType] = useState<TaskType | "all">("all");
+  const [selectedUrgency, setSelectedUrgency] = useState<UrgencyLevel | "all">("all");
+  const [selectedStatus, setSelectedStatus] = useState<TaskStatus | "all">("all");
+
+  // Filter tasks based on current filters
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           task.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSector = selectedSector === "all" || task.sectorId === selectedSector;
+      const matchesType = selectedType === "all" || task.type === selectedType;
+      const matchesUrgency = selectedUrgency === "all" || task.urgency === selectedUrgency;
+      const matchesStatus = selectedStatus === "all" || task.status === selectedStatus;
+
+      return matchesSearch && matchesSector && matchesType && matchesUrgency && matchesStatus;
+    });
+  }, [tasks, searchTerm, selectedSector, selectedType, selectedUrgency, selectedStatus]);
+
+  // Count active filters
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (selectedSector !== "all") count++;
+    if (selectedType !== "all") count++;
+    if (selectedUrgency !== "all") count++;
+    if (selectedStatus !== "all") count++;
+    return count;
+  }, [searchTerm, selectedSector, selectedType, selectedUrgency, selectedStatus]);
+
+  const handleCreateTask = (formData: TaskFormData) => {
+    const newTask: Task = {
+      id: `task-${Date.now()}`,
+      title: formData.title,
+      description: formData.description,
+      sectorId: formData.sectorId,
+      type: formData.type,
+      urgency: formData.urgency,
+      dueDate: formData.dueDate,
+      status: "pending",
+      deliveryStatus: undefined,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    setTasks((prev) => [newTask, ...prev]);
+    setIsTaskFormOpen(false);
+  };
+
+  const handleTaskUpdate = (taskId: string, updates: Partial<Task>) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === taskId
+          ? { ...task, ...updates, updatedAt: new Date() }
+          : task
+      )
+    );
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedSector("all");
+    setSelectedType("all");
+    setSelectedUrgency("all");
+    setSelectedStatus("all");
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+              Gestão de Tarefas Executiva
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Sistema de controle de tarefas corporativas
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Building2 className="h-4 w-4" />
+              <span>{sectors.length} setores</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>{tasks.length} tarefas</span>
+            </div>
+            
+            <Dialog open={isTaskFormOpen} onOpenChange={setIsTaskFormOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Nova Tarefa
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Criar Nova Tarefa</DialogTitle>
+                </DialogHeader>
+                <TaskForm onSubmit={handleCreateTask} />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Dashboard */}
+        <Dashboard tasks={tasks} />
+
+        {/* Filters */}
+        <div className="card-elevated">
+          <TaskFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedSector={selectedSector}
+            onSectorChange={setSelectedSector}
+            selectedType={selectedType}
+            onTypeChange={setSelectedType}
+            selectedUrgency={selectedUrgency}
+            onUrgencyChange={setSelectedUrgency}
+            selectedStatus={selectedStatus}
+            onStatusChange={setSelectedStatus}
+            onClearFilters={clearFilters}
+            activeFiltersCount={activeFiltersCount}
+          />
+        </div>
+
+        {/* Task List */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">
+              Tarefas {activeFiltersCount > 0 && "(Filtradas)"}
+            </h2>
+            <Badge variant="secondary">
+              {filteredTasks.length} de {tasks.length}
+            </Badge>
+          </div>
+          
+          <TaskList
+            tasks={filteredTasks}
+            onTaskUpdate={handleTaskUpdate}
+          />
+        </div>
       </div>
     </div>
   );
