@@ -34,7 +34,7 @@ export function TaskFilters({
   onStatusChange,
   onClearFilters,
   activeFiltersCount,
-  sectors,
+  sectors = [],
 }: TaskFiltersProps) {
   return (
     <div className="space-y-4">
@@ -67,7 +67,7 @@ export function TaskFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os setores</SelectItem>
-            {sectors.map((sector) => (
+            {sectors?.map((sector) => (
               <SelectItem key={sector.id} value={sector.id}>
                 {sector.name}
               </SelectItem>

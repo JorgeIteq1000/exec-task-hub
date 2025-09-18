@@ -7,7 +7,7 @@ interface TaskListProps {
   sectors: Sector[];
 }
 
-export function TaskList({ tasks, onTaskUpdate, sectors }: TaskListProps) {
+export function TaskList({ tasks, onTaskUpdate, sectors = [] }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12">

@@ -18,7 +18,7 @@ interface DashboardProps {
   sectors: Sector[];
 }
 
-export function Dashboard({ tasks, sectors }: DashboardProps) {
+export function Dashboard({ tasks, sectors = [] }: DashboardProps) {
   // Calculate metrics
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(task => task.status === "completed").length;
@@ -32,7 +32,7 @@ export function Dashboard({ tasks, sectors }: DashboardProps) {
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   // Tasks by sector
-  const tasksBySector = sectors.map(sector => {
+  const tasksBySector = sectors?.map(sector => {
     const sectorTasks = tasks.filter(task => task.sectorId === sector.id);
     const sectorCompleted = sectorTasks.filter(task => task.status === "completed").length;
     const sectorCompletionRate = sectorTasks.length > 0 ? Math.round((sectorCompleted / sectorTasks.length) * 100) : 0;
@@ -43,7 +43,7 @@ export function Dashboard({ tasks, sectors }: DashboardProps) {
       completedTasks: sectorCompleted,
       completionRate: sectorCompletionRate,
     };
-  });
+  }) || [];
 
   // Tasks by urgency
   const urgencyStats = [

@@ -11,8 +11,8 @@ interface TaskCardProps {
   sectors: Sector[];
 }
 
-export function TaskCard({ task, onTaskUpdate, sectors }: TaskCardProps) {
-  const sector = sectors.find(s => s.id === task.sectorId);
+export function TaskCard({ task, onTaskUpdate, sectors = [] }: TaskCardProps) {
+  const sector = sectors?.find(s => s.id === task.sectorId);
   
   const getStatusIcon = () => {
     switch (task.status) {

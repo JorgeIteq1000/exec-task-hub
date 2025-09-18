@@ -18,7 +18,7 @@ interface TaskFormProps {
   sectors: Sector[];
 }
 
-export function TaskForm({ onSubmit, sectors }: TaskFormProps) {
+export function TaskForm({ onSubmit, sectors = [] }: TaskFormProps) {
   const [formData, setFormData] = useState<TaskFormData>({
     title: "",
     description: "",
@@ -148,7 +148,7 @@ export function TaskForm({ onSubmit, sectors }: TaskFormProps) {
                   <SelectValue placeholder="Selecione o setor" />
                 </SelectTrigger>
                 <SelectContent>
-                  {sectors.map((sector) => (
+                  {sectors?.map((sector) => (
                     <SelectItem key={sector.id} value={sector.id}>
                       {sector.name}
                     </SelectItem>
