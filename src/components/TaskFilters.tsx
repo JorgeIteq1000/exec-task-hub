@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, X } from "lucide-react";
-import { sectors } from "@/lib/mockData";
-import type { TaskType, UrgencyLevel, TaskStatus } from "@/types";
+import type { TaskType, UrgencyLevel, TaskStatus, Sector } from "@/types";
 
 interface TaskFiltersProps {
   searchTerm: string;
@@ -19,6 +18,7 @@ interface TaskFiltersProps {
   onStatusChange: (value: TaskStatus | "all") => void;
   onClearFilters: () => void;
   activeFiltersCount: number;
+  sectors: Sector[];
 }
 
 export function TaskFilters({
@@ -34,6 +34,7 @@ export function TaskFilters({
   onStatusChange,
   onClearFilters,
   activeFiltersCount,
+  sectors,
 }: TaskFiltersProps) {
   return (
     <div className="space-y-4">

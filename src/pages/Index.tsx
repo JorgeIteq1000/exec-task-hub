@@ -2,16 +2,19 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge-enhanced";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Building2, Users, Calendar } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Building2, Users, Calendar, Settings } from "lucide-react";
 import { Dashboard } from "@/components/Dashboard";
 import { TaskFilters } from "@/components/TaskFilters";
 import { TaskList } from "@/components/TaskList";
 import { TaskForm } from "@/components/TaskForm";
-import { tasks as mockTasks, sectors } from "@/lib/mockData";
-import type { Task, TaskType, UrgencyLevel, TaskStatus, TaskFormData } from "@/types";
+import { SectorManagement } from "@/components/SectorManagement";
+import { tasks as mockTasks, sectors as mockSectors } from "@/lib/mockData";
+import type { Task, Sector, TaskType, UrgencyLevel, TaskStatus, TaskFormData } from "@/types";
 
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [sectors, setSectors] = useState<Sector[]>(mockSectors);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   
   // Filter states
@@ -75,6 +78,34 @@ const Index = () => {
     );
   };
 
+  const handleAddSector = (sectorData: Omit<Sector, "id">) => {
+    const newSector: Sector = {
+      ...sectorData,
+      id: `sector-${Date.now()}`,
+    };
+    setSectors((prev) => [...prev, newSector]);
+  };
+
+  const handleRemoveSector = (sectorId: string) => {
+    // Check if sector has tasks
+    const hasActiveTasks = tasks.some(task => task.sectorId === sectorId);
+    
+    if (hasActiveTasks) {
+      alert("Não é possível remover um setor que possui tarefas ativas. Remova ou transfira as tarefas primeiro.");
+      return;
+    }
+    
+    setSectors((prev) => prev.filter(sector => sector.id !== sectorId));
+  };
+
+  const handleUpdateSector = (sectorId: string, updates: Partial<Sector>) => {
+    setSectors((prev) =>
+      prev.map((sector) =>
+        sector.id === sectorId ? { ...sector, ...updates } : sector
+      )
+    );
+  };
+
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedSector("all");
@@ -118,49 +149,79 @@ const Index = () => {
                 <DialogHeader>
                   <DialogTitle>Criar Nova Tarefa</DialogTitle>
                 </DialogHeader>
-                <TaskForm onSubmit={handleCreateTask} />
+                <TaskForm 
+                  onSubmit={handleCreateTask}
+                  sectors={sectors}
+                />
               </DialogContent>
             </Dialog>
           </div>
         </div>
 
-        {/* Dashboard */}
-        <Dashboard tasks={tasks} />
+        {/* Main Content with Tabs */}
+        <Tabs defaultValue="tasks" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="tasks" className="gap-2">
+              <Calendar className="h-4 w-4" />
+              Tarefas
+            </TabsTrigger>
+            <TabsTrigger value="sectors" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Gerenciar Setores
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Filters */}
-        <div className="card-elevated">
-          <TaskFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            selectedSector={selectedSector}
-            onSectorChange={setSelectedSector}
-            selectedType={selectedType}
-            onTypeChange={setSelectedType}
-            selectedUrgency={selectedUrgency}
-            onUrgencyChange={setSelectedUrgency}
-            selectedStatus={selectedStatus}
-            onStatusChange={setSelectedStatus}
-            onClearFilters={clearFilters}
-            activeFiltersCount={activeFiltersCount}
-          />
-        </div>
+          <TabsContent value="tasks" className="space-y-6">
+            {/* Dashboard */}
+            <Dashboard tasks={tasks} sectors={sectors} />
 
-        {/* Task List */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">
-              Tarefas {activeFiltersCount > 0 && "(Filtradas)"}
-            </h2>
-            <Badge variant="secondary">
-              {filteredTasks.length} de {tasks.length}
-            </Badge>
-          </div>
-          
-          <TaskList
-            tasks={filteredTasks}
-            onTaskUpdate={handleTaskUpdate}
-          />
-        </div>
+            {/* Filters */}
+            <div className="card-elevated">
+              <TaskFilters
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                selectedSector={selectedSector}
+                onSectorChange={setSelectedSector}
+                selectedType={selectedType}
+                onTypeChange={setSelectedType}
+                selectedUrgency={selectedUrgency}
+                onUrgencyChange={setSelectedUrgency}
+                selectedStatus={selectedStatus}
+                onStatusChange={setSelectedStatus}
+                onClearFilters={clearFilters}
+                activeFiltersCount={activeFiltersCount}
+                sectors={sectors}
+              />
+            </div>
+
+            {/* Task List */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold">
+                  Tarefas {activeFiltersCount > 0 && "(Filtradas)"}
+                </h2>
+                <Badge variant="secondary">
+                  {filteredTasks.length} de {tasks.length}
+                </Badge>
+              </div>
+              
+              <TaskList
+                tasks={filteredTasks}
+                onTaskUpdate={handleTaskUpdate}
+                sectors={sectors}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="sectors" className="space-y-6">
+            <SectorManagement
+              sectors={sectors}
+              onAddSector={handleAddSector}
+              onRemoveSector={handleRemoveSector}
+              onUpdateSector={handleUpdateSector}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

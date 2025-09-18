@@ -11,14 +11,14 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { sectors } from "@/lib/mockData";
-import type { TaskFormData, TaskType, UrgencyLevel } from "@/types";
+import type { TaskFormData, TaskType, UrgencyLevel, Sector } from "@/types";
 
 interface TaskFormProps {
   onSubmit: (data: TaskFormData) => void;
+  sectors: Sector[];
 }
 
-export function TaskForm({ onSubmit }: TaskFormProps) {
+export function TaskForm({ onSubmit, sectors }: TaskFormProps) {
   const [formData, setFormData] = useState<TaskFormData>({
     title: "",
     description: "",

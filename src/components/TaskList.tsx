@@ -1,12 +1,13 @@
 import { TaskCard } from "./TaskCard";
-import type { Task } from "@/types";
+import type { Task, Sector } from "@/types";
 
 interface TaskListProps {
   tasks: Task[];
   onTaskUpdate: (taskId: string, updates: Partial<Task>) => void;
+  sectors: Sector[];
 }
 
-export function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
+export function TaskList({ tasks, onTaskUpdate, sectors }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12">
@@ -25,6 +26,7 @@ export function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
           key={task.id}
           task={task}
           onTaskUpdate={onTaskUpdate}
+          sectors={sectors}
         />
       ))}
     </div>

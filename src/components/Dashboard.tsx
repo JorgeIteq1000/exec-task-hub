@@ -11,14 +11,14 @@ import {
   Building2,
   BarChart3
 } from "lucide-react";
-import { sectors } from "@/lib/mockData";
-import type { Task } from "@/types";
+import type { Task, Sector } from "@/types";
 
 interface DashboardProps {
   tasks: Task[];
+  sectors: Sector[];
 }
 
-export function Dashboard({ tasks }: DashboardProps) {
+export function Dashboard({ tasks, sectors }: DashboardProps) {
   // Calculate metrics
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(task => task.status === "completed").length;

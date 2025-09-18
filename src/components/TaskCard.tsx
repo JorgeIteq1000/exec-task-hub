@@ -3,15 +3,15 @@ import { Badge } from "@/components/ui/badge-enhanced";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Clock, AlertCircle, CheckCircle, XCircle } from "lucide-react";
-import { sectors } from "@/lib/mockData";
-import type { Task } from "@/types";
+import type { Task, Sector } from "@/types";
 
 interface TaskCardProps {
   task: Task;
   onTaskUpdate: (taskId: string, updates: Partial<Task>) => void;
+  sectors: Sector[];
 }
 
-export function TaskCard({ task, onTaskUpdate }: TaskCardProps) {
+export function TaskCard({ task, onTaskUpdate, sectors }: TaskCardProps) {
   const sector = sectors.find(s => s.id === task.sectorId);
   
   const getStatusIcon = () => {
