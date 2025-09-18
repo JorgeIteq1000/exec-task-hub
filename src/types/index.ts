@@ -18,6 +18,7 @@ export interface Task {
   urgency: UrgencyLevel;
   status: TaskStatus;
   deliveryStatus?: DeliveryStatus;
+  deliveryNotes?: string;
   dueDate: Date;
   createdAt: Date;
   updatedAt: Date;
